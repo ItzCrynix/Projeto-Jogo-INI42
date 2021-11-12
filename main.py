@@ -7,7 +7,7 @@ from Objetos import *
 # -------------- parte principal ---------------- #
 def init():
     # ------------ funções que repetem ------------ #
-    def __redefine_blocos():
+    def __redefine_blocos(blocos):
         """
         Basicamente, redefine a matriz de blocos do jogo
         """
@@ -55,8 +55,21 @@ def init():
 
     # ------------------- código do jogo ---------------- #
     def __main():
+        # Cria a linha de blocos para serem destruidos >:)
+        blocos = []
+        __redefine_blocos(blocos)
+
+        # Jogador
+        player = Jogador(largura / 2 - (largura * 0.3 / 2), altura - 20, largura * 0.3, 10, tela)
+        # Bola
+        bola = Bola(tela, largura / 2, altura / 2, 10)
+        clock = pygame.time.Clock()
+
         while True:
+            clock.tick(360)
+            # Background a partir de cor
             tela.fill((0, 0, 0))
+            #Background a partir de imagem
 
             # ------------- eventos ------------- #
             for event in pygame.event.get():
@@ -85,6 +98,11 @@ def init():
 
             player.show()
             bola.show()
+            # Verifica se a bola passou do jogador, fazendo o jogo parar (porque ai você perdeu)
+            if bola.y > player.y:
+                bola = None
+                break
+
             # Colisão bola com player
             if bola.obj.colliderect(player.obj):
                 # Inverte a velocidade do y, para ele ir na direção contraria ao player
@@ -121,26 +139,20 @@ def init():
                 # Ele ve se a linha ta zerada, incrementando se sim
                 if len(blocos[num]) == 0:
                     cont += 1
-            # Se o numero de linhas zeradas for igual a length da matriz, ele para
+            # Se o numero de linhas zeradas for igual a length da matriz, ele para o loop do jogo
             if cont == len(blocos):
                 break
 
 
     # --------------- Parte de Inicialização ---------------- #
     pygame.init()
-    pygame.mixer.music.load(r'ngcdaddy.mp3')
+    pygame.mixer.music.load(r'./src/ngcdaddy.mp3')
     pygame.mixer.music.play(-1)
 
     tela = pygame.display.set_mode((largura, altura))
     pygame.display.set_caption('Jogo dos tijolos')
-
-    # Cria a linha de blocos para serem destruidos >:)
-    blocos = []
-    __redefine_blocos()
-
-    # Jogador
-    player = Jogador(largura / 2 - (largura * 0.3 / 2), altura - 20, largura * 0.3, 10, tela)
-    bola = Bola(tela, largura / 2, altura / 2, 10)
+    #icone = pygame.image.load(r'./src/icon.png')
+    #pygame.display.set_icon(icone)
 
     __menu()
 
