@@ -2,19 +2,19 @@ import pygame
 import random
 import math
 
-largura = 1000
-altura = 500
-qtdcolunas = random.randint(5, 10)
-qtdlinhas = random.randint(3, 5)
+from pygame.surface import Surface
+
+largura = 640
+altura = 480
 
 class Retangulo():
-    def __init__(self, x, y, larg, alt, tela):
+    def __init__(self, x: int, y: int, larg: int, alt: int, tela: pygame.Surface):
         self.x = x
         self.y = y
         self.width = larg
         self.height = alt
         self.__tela = tela
-        self.obj = None
+        self.obj = pygame.Rect(0, 0, 0, 0)
         self.cor = (int(random.random() * 255), int(random.random() * 255), int(random.random() * 255))
 
     def show(self):
@@ -22,7 +22,7 @@ class Retangulo():
 
 
 class Jogador():
-    def __init__(self, x, y, larg, alt, tela):
+    def __init__(self, x: int, y: int, larg: int, alt: int, tela: pygame.Surface):
         self.x = x
         self.y = y
         self.width = larg
@@ -45,7 +45,7 @@ class Jogador():
 
         if self.x < 0:
             self.x += self.speed
-        elif self.x + self.width > largura:
+        elif self.x + self.width > self.tela.get_width():
             self.x -= self.speed
 
     def show(self):
@@ -54,7 +54,7 @@ class Jogador():
 
 
 class Bola():
-    def __init__(self, tela, x, y, raio, cor=(255, 255, 255)):
+    def __init__(self, tela: pygame.Surface, x: int, y: int, raio: float, cor: tuple =(255, 255, 255)):
         self.x = x
         self.y = y
         self.raio = raio
@@ -68,13 +68,13 @@ class Bola():
         self.x += self.xspeed
         self.y += self.yspeed
 
-        if self.x > largura - self.raio:
-            self.x = largura - self.raio
+        if self.x > self.tela.get_width() - self.raio:
+            self.x = self.tela.get_width() - self.raio
             self.mudax()
         elif self.x < self.raio:
             self.x = self.raio
             self.mudax()
-        if self.y > altura - self.raio or self.y < 0 + self.raio:
+        if self.y > self.tela.get_height() - self.raio or self.y < 0 + self.raio:
             self.muday()
     
     def muday(self):

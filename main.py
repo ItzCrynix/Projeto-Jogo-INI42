@@ -7,29 +7,42 @@ from Objetos import *
 # -------------- parte principal ---------------- #
 def init():
     # ------------ funções que repetem ------------ #
-    def __redefine_blocos(blocos):
+    def __redefine_blocos(blocos: list, qtdcolunas: int, qtdlinhas: int) -> None:
         """
         Basicamente, redefine a matriz de blocos do jogo
         """
         for linha in range(qtdlinhas):
             col = []
             for coluna in range(qtdcolunas):
-                larg = largura / qtdcolunas
-                alt = (altura * 0.4) / qtdlinhas
+                larg = tela.get_width() / qtdcolunas
+                alt = (tela.get_height() * 0.4) / qtdlinhas
                 col.append(Retangulo(larg * coluna, alt * linha, larg, alt, tela))
             blocos.append(col)
 
     # ------------------- códido do menu ---------------- #
     def __menu():
+        """
+        Tela do menu do jogo
+        """
+
+        # ----------------- Textos e imagens para o menu ---------------- #
+        # Posições feitas usando calculos para que fiquem em uma posição proporcional ao tamanho da tela
+        # para que não tenha problemas de posicionamento na hora de mudar o tamanho da tela
+
         fonte = pygame.font.SysFont('Arial', 30)
 
-        lb1 = fonte.render('Bem vindo ao nosso jogo!', False, (255, 255, 255), (0, 0, 0))
-        poslb1 = (largura / 2 - lb1.get_width() / 2, altura / 3  - lb1.get_height() /2)
+        imgLogo = pygame.image.load(r'./src/imgLogo.png')
+        poslb1 = (tela.get_width() / 2 - imgLogo.get_width() / 2, tela.get_height() / 3  - imgLogo.get_height() /2)
 
         lbJogar = fonte.render('Jogar', False, (0, 0, 255), (0, 0, 0))
-        posJogar = (largura / 2 - lbJogar.get_width() / 2, altura / 2 - lbJogar.get_height() /2)
+        posJogar = (tela.get_width() / 2 - lbJogar.get_width() / 2, (tela.get_height() * 2) / 3 - lbJogar.get_height() /2)
 
         lbSair = fonte.render('Sair', False, (0, 0, 255), (0, 0, 0))
+        posSair = (tela.get_width() / 2 - lbSair.get_width() / 2, (tela.get_height() * 3) / 4 - lbSair.get_height() / 2)
+
+        imgsDificuldades = [pygame.image.load(r'./src/easy.png'), pygame.image.load(r'./src/normal.png'), pygame.image.load(r'./src/hard.png')]
+        posImgs = lambda img: (tela.get_width() - img.get_width(), tela.get_height() - img.get_height())
+        atual = 0
 
         while True:
             tela.fill((0, 0, 0))
@@ -37,32 +50,54 @@ def init():
                 if event.type == QUIT:
                     pygame.quit()
                     exit()
-                
-                if event.type == MOUSEBUTTONDOWN:
+                elif event.type == KEYDOWN:
+                    keys = pygame.key.get_pressed()
+
+                    if keys[K_RIGHT]:
+                        atual += 1
+                        if atual == len(imgsDificuldades):
+                            atual = 0
+                    if keys[K_LEFT]:
+                        atual -= 1
+                        if atual < 0:
+                            atual = len(imgsDificuldades) - 1
+
+                elif event.type == MOUSEBUTTONDOWN:
                     mouse = pygame.mouse.get_pressed()
-                    # Caso seja o botão esquerdo que tenha sido apertado
+                    # Caso seja o botão esquerdo do mouse que tenha sido apertado
                     if mouse[0]:
                         pos = pygame.mouse.get_pos()
                         # se estiver na mesma posição do "Botão" Jogar
-                        if pos[1] > altura / 2 - lb1.get_height() / 2 and pos[1] < altura / 2 + lbJogar.get_height():
-                            __main()
+                        if pos[1] > posJogar[1] and pos[1] < posJogar[1] + lbJogar.get_height() and pos[0] > posJogar[0] and pos[0] < posJogar[0] + lbJogar.get_width():
+                            __main(atual)
                             break
 
-            tela.blit(lb1, poslb1)
+            tela.blit(imgLogo, poslb1)
             tela.blit(lbJogar, posJogar)
+            tela.blit(lbSair, posSair)
+            tela.blit(imgsDificuldades[atual], posImgs(imgsDificuldades[atual]))
             pygame.display.update()
 
 
     # ------------------- código do jogo ---------------- #
-    def __main():
+    def __main(dificuldade: int):
+        """
+        Parte principal deste programa.
+        Essa é a tela que roda o jogo
+        """
+        min = 3
+        max = 4
+        qtdColunas = random.randint(dificuldade + min, dificuldade + max)
+        qtdLinhas = random.randint(dificuldade + min, dificuldade + max)
+
         # Cria a linha de blocos para serem destruidos >:)
         blocos = []
-        __redefine_blocos(blocos)
+        __redefine_blocos(blocos, qtdColunas, qtdLinhas)
 
         # Jogador
-        player = Jogador(largura / 2 - (largura * 0.3 / 2), altura - 20, largura * 0.3, 10, tela)
+        player = Jogador(tela.get_width() / 2 - (tela.get_width() * 0.3 / 2), tela.get_height() - 20, tela.get_width() * 0.3, 10, tela)
         # Bola
-        bola = Bola(tela, largura / 2, altura / 2, 10)
+        bola = Bola(tela, tela.get_width() / 2, tela.get_height() / 2, 10)
         clock = pygame.time.Clock()
 
         while True:
@@ -117,8 +152,6 @@ def init():
             # Iteração entre todos os blocos para mostra-los na tela    
             for linha in blocos:
                 for bloco in linha:
-                    bloco.show()
-
                     # Verifica se a bola colidiu com o bloco
                     if bola.obj.colliderect(bloco.obj):
                         # Aqui ele analisa em que posição a bola colidiu com o bloco (do lado, em baixo ou em cima)
@@ -129,6 +162,7 @@ def init():
                         elif bola.y < bloco.y:
                             bola.muday()
                         linha.remove(bloco) # Remove o bloco acertado da linha
+                    bloco.show()
 
             # Mostra tudo que atualizou na tela
             pygame.display.update()
@@ -146,8 +180,8 @@ def init():
 
     # --------------- Parte de Inicialização ---------------- #
     pygame.init()
-    pygame.mixer.music.load(r'./src/ngcdaddy.mp3')
-    pygame.mixer.music.play(-1)
+    #pygame.mixer.music.load(r'./src/ngcdaddy.mp3')
+    #pygame.mixer.music.play(-1)
 
     tela = pygame.display.set_mode((largura, altura))
     pygame.display.set_caption('Jogo dos tijolos')
