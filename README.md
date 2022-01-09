@@ -7,6 +7,7 @@
 | --- | --- | --- |
 | Cainan Loyola Schiavolin | 20126 | PD20 |
 | Paulo Henrique Francisco Felipe | 20150 | PD20 |
+| Jão | 24666 | F120 |
 
 
 Criamos um jogo no estilo [Atari Breakout](https://pt.wikipedia.org/wiki/Breakout_(jogo_eletr%C3%B4nico))
